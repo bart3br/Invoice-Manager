@@ -46,12 +46,5 @@ def login():
     form = LoginForm()
     return render_template('login.html', title='Login', form=form)
 
-#windows powershell
-#$env:FLASK_APP = "main.py"
-#flask run
-#to work in debug mode (so we don't have to shut down and restart the server every time we make a change):
-#$env:FLASK_DEBUG=1
-#when we have the if name == main statement, we can run the app with python main.py
-
 if __name__ == '__main__':
     app.run(debug=True)
