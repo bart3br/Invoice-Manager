@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% block content %}
+    {% for intake in intakes %}
+        <article class="media content-section">
+            <div class="media-body">
+                <div class="article-metadata">
+                    <a class="mr-2" href="#">{{ intake.author }}</a>
+                    <small class="text-muted">{{ intake.date_posted }}</small>
+                </div>
+                <h2><a class="article-title" href="#">{{ intake.name }}</a></h2>
+                <p class="article-content">{{ intake.content }}</p>
+            </div>
+        </article>
+    {% endfor %}
+{% endblock content %}
