@@ -2,7 +2,7 @@ from flask import render_template, url_for, flash, redirect
 from application import app, db, bcrypt
 from application.models import User, Invoice, Entry
 from application.forms import RegistrationForm, LoginForm
-from flask_login import login_user, current_user
+from flask_login import login_user, current_user, logout_user
 
 invoices = [
     {
@@ -32,6 +32,10 @@ def about():
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
+    #if user is already logged in, redirect to home page
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    
     form = RegistrationForm()
     
     if form.validate_on_submit():
@@ -50,6 +54,10 @@ def register():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    #if user is already logged in, redirect to home page
+    if current_user.is_authenticated:
+        return redirect(url_for('home'))
+    
     form = LoginForm()
     
     if form.validate_on_submit():
@@ -61,3 +69,8 @@ def login():
         else:
             flash('Unsuccessful login. Check your email and password and try again.', 'danger')
     return render_template('login.html', title='Login', form=form)
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('home'))
