@@ -3,6 +3,9 @@ from application import app, db, bcrypt
 from application.models import User, Invoice, Entry
 from application.forms import RegistrationForm, LoginForm, UpdateAccountForm
 from flask_login import login_user, current_user, logout_user, login_required
+import secrets
+import os
+from PIL import Image
 
 invoices = [
     {
@@ -76,11 +79,24 @@ def logout():
     logout_user()
     return redirect(url_for('home'))
 
+def save_new_picture(form_picture):
+    #randomizing the name of the picture so it doesn't collide with other pictures in pictures folder
+    random_hex = secrets.token_hex(12)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path,'static/pictures', picture_fn)
+    
+    form_picture.save(picture_path)
+    return picture_fn
+
 @app.route('/account', methods=['GET', 'POST'])
 @login_required
 def account():
     form = UpdateAccountForm()
     if form.validate_on_submit():
+        if form.picture.data:
+            picture_file = save_new_picture(form.picture.data)
+            current_user.image_file = picture_file
         current_user.username = form.username.data
         current_user.email = form.email.data
         db.session.commit()
