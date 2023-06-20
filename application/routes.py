@@ -1,9 +1,7 @@
-from flask import Flask, render_template, url_for, flash, redirect
-from forms import RegistrationForm, LoginForm
-app = Flask(__name__)
-
-#randomly generated 16 byte secret key (by running secrets.token_hex in terminal)
-app.config['SECRET_KEY'] = 'cd427c1e4b942503f56b028cea251a64'
+from flask import render_template, url_for, flash, redirect
+from application import app
+from application.models import User, Invoice, Entry
+from application.forms import RegistrationForm, LoginForm
 
 invoices = [
     {
@@ -41,10 +39,14 @@ def register():
         return redirect(url_for('home'))
     return render_template('register.html', title='Register', form=form)
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
+    
+    if form.validate_on_submit():
+        if form.email.data == 'admin@admin.com' and form.password.data == 'password':
+            flash('You have been logged in!', 'success')
+            return redirect(url_for('home'))
+        else:
+            flash('Unsuccessful login. Check your email and password and try again.', 'danger')
     return render_template('login.html', title='Login', form=form)
-
-if __name__ == '__main__':
-    app.run(debug=True)
