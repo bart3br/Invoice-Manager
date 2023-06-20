@@ -2,6 +2,7 @@ from flask import render_template, url_for, flash, redirect
 from application import app, db, bcrypt
 from application.models import User, Invoice, Entry
 from application.forms import RegistrationForm, LoginForm
+from flask_login import login_user, current_user
 
 invoices = [
     {
@@ -52,8 +53,10 @@ def login():
     form = LoginForm()
     
     if form.validate_on_submit():
-        if form.email.data == 'admin@admin.com' and form.password.data == 'password':
-            flash('You have been logged in!', 'success')
+        user = User.query.filter_by(email=form.email.data).first()
+        #if user exists and password is correct, log the user in
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user, remember=form.remember.data)
             return redirect(url_for('home'))
         else:
             flash('Unsuccessful login. Check your email and password and try again.', 'danger')
