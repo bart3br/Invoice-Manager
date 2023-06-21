@@ -25,7 +25,7 @@ class Invoice(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(100), nullable = False)
     content = db.Column(db.Text, nullable = False)
-    amount = db.Column(db.Integer, nullable = False)
+    amount = db.Column(db.Numeric(10,2), nullable = False)
     date_posted = db.Column(db.DateTime, nullable = False, default = datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
     entries = db.relationship('Entry', backref='invoice', lazy=True)

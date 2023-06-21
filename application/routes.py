@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect, request
+from flask import render_template, url_for, flash, redirect, request, abort
 from application import app, db, bcrypt
 from application.models import User, Invoice, Entry
 from application.forms import RegistrationForm, LoginForm, UpdateAccountForm, InvoiceForm
@@ -103,9 +103,46 @@ def new_invoice():
         db.session.commit()
         flash('Created a new invoice!', 'success')
         return redirect(url_for('home'))
-    return render_template('create_invoice.html', title='New Invoice', form=form)
+    return render_template('create_invoice.html', title='New Invoice', form=form, legend='New Invoice')
 
 @app.route('/invoice/<int:invoice_id>')
 def invoice(invoice_id):
     invoice = Invoice.query.get_or_404(invoice_id)
     return render_template('invoice.html', title=invoice.name, invoice=invoice)
+
+@app.route('/invoice/<int:invoice_id>/update', methods=['GET', 'POST'])
+@login_required
+def update_invoice(invoice_id):
+    invoice = Invoice.query.get_or_404(invoice_id)
+    #only the author of the invoice can update it
+    if invoice.author != current_user:
+        abort(403)
+    form = InvoiceForm()
+    if form.validate_on_submit():
+        invoice.name = form.name.data
+        invoice.content = form.entries.data
+        invoice.amount = form.amount.data
+        db.session.commit()
+        flash('Updated the invoice successfully!', 'success')
+        return redirect(url_for('invoice', invoice_id=invoice.id))
+    elif request.method == 'GET':
+        form.name.data = invoice.name
+        form.entries.data = invoice.content
+        form.amount.data = invoice.amount
+    return render_template('create_invoice.html', title='Update Invoice', form=form, legend='Update Invoice')
+
+@app.route('/invoice/<int:invoice_id>/delete', methods=['POST'])
+@login_required
+def delete_invoice(invoice_id):
+    invoice = Invoice.query.get_or_404(invoice_id)
+    #only the author of the invoice can update it
+    if invoice.author != current_user:
+        abort(403)
+        
+    #cascade delete all entries related to the invoice being deleted
+    Entry.query.filter_by(invoice_id=invoice.id).delete()
+    #deleting invoice
+    db.session.delete(invoice)
+    db.session.commit()
+    flash('Invoice has been deleted!', 'success')
+    return redirect(url_for('home'))
