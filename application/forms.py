@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from flask_login import current_user
-from wtforms import StringField, PasswordField, SubmitField, BooleanField, ValidationError
+from wtforms import StringField, PasswordField, SubmitField, BooleanField, ValidationError, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, email_validator
 from application.models import User
 
@@ -55,3 +55,9 @@ class UpdateAccountForm(FlaskForm):
             email = User.query.filter_by(email=email.data).first()
             if email:
                 raise ValidationError('That email is already in use. Try a different one.')
+            
+class InvoiceForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    entries = TextAreaField('Entries', validators=[DataRequired()])
+    amount = StringField('Amount', validators=[DataRequired()])
+    submit = SubmitField('Upload')

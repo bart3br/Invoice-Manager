@@ -1,32 +1,15 @@
 from flask import render_template, url_for, flash, redirect, request
 from application import app, db, bcrypt
 from application.models import User, Invoice, Entry
-from application.forms import RegistrationForm, LoginForm, UpdateAccountForm
+from application.forms import RegistrationForm, LoginForm, UpdateAccountForm, InvoiceForm
 from flask_login import login_user, current_user, logout_user, login_required
 import secrets
 import os
-from PIL import Image
-
-invoices = [
-    {
-        'author': 'Bartosz Rodowicz',
-        'name': 'Faktura 1',
-        'content': 'First post content',
-        'amount': '1000.00',
-        'date_posted': 'June 20, 2023'
-    },
-    {
-        'author': 'Jan Kowalski',
-        'name': 'Faktura 2',
-        'content': 'Second post content',
-        'amount': '1540.20',
-        'date_posted': 'June 21, 2023'
-    }
-]
 
 @app.route('/')
 @app.route('/home')
 def home():
+    invoices = Invoice.query.all()
     return render_template('home.html', invoices=invoices)
 
 @app.route('/about')
@@ -108,3 +91,16 @@ def account():
         form.email.data = current_user.email    
     image_file = url_for('static', filename='pictures/' + current_user.image_file)
     return render_template('account.html', title='Account', image_file=image_file, form=form)
+
+@app.route('/invoice/new', methods=['GET', 'POST'])
+@login_required
+def new_invoice():
+    form = InvoiceForm()
+    if form.validate_on_submit():
+        #TODO HERE IS THE CONFLICT WITH CONTENT AND ENTRIES
+        invoice = Invoice(name=form.name.data, content=form.entries.data, amount=form.amount.data, author=current_user)
+        db.session.add(invoice)
+        db.session.commit()
+        flash('Created a new invoice!', 'success')
+        return redirect(url_for('home'))
+    return render_template('create_invoice.html', title='New Invoice', form=form)
