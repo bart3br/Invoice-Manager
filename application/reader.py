@@ -59,13 +59,14 @@ def extract_entries(text: str) -> list[dict]:
 
     invoice_entries = []
     for entry in entries:
-        name, quantity, price, total_price = entry
+        name, quantity, price, total_price, tax = process_entry(entry)
+        
         entry_data = {
-            'name': name.strip(),
-            'quantity': int(quantity),
-            'price': float(price.replace(',', '.')),
-            'total_price': float(total_price.replace(',', '.')),
-            'tax': round(float(0.23 * float(total_price.replace(',', '.'))),2)
+            'name': name,
+            'quantity': quantity,
+            'price': price,
+            'total_price': total_price,
+            'tax': tax
         }
         invoice_entries.append(entry_data)
 
@@ -76,6 +77,26 @@ def extract_entries(text: str) -> list[dict]:
             entry['name'] = entry['name'][len('NETTO VAT\n'):]
             
     return invoice_entries
+
+def process_entry(entry: list[str]) -> tuple:
+    name, quantity, price, total_price = entry
+    
+    name = name.strip()
+    try:
+        quantity = int(quantity)
+    except ValueError:
+        quantity = 1
+    try:
+        price = round(float(price.replace(',', '.')), 2)
+    except ValueError:
+        price = 0.0
+    try:
+        total_price = round(float(total_price.replace(',', '.')),2)
+    except ValueError:
+        total_price = round(quantity * price, 2)
+        
+    tax = round(float(0.23 * total_price),2)
+    return (name, quantity, price, total_price, tax)
 
 #testing the functions
 def reading_test():
