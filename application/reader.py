@@ -114,4 +114,5 @@ def reading_test():
                 print('Entries:', extract_entries(text))
                 
 if __name__ == '__main__':
+    #reading_test()
     pass
