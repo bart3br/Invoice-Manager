@@ -7,8 +7,7 @@
                     <a class="mr-2" href="#">{{ invoice.author.username }}</a>
                     <small class="text-muted">{{ invoice.date_posted.strftime('%Y-%m-%d %H:%M') }}</small>
                 </div>
-                <h2><a class="article-title" href="#">{{ invoice.name }}</a></h2>
-                <p class="article-content">{{ invoice.content }}</p>
+                <h2><a class="article-title" href="{{ url_for('invoice', invoice_id=invoice.id) }}">{{ invoice.name }}</a></h2>
                 <p class="article-content">Total Amount: {{ invoice.amount }}</p>
             </div>
         </article>

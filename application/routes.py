@@ -104,3 +104,8 @@ def new_invoice():
         flash('Created a new invoice!', 'success')
         return redirect(url_for('home'))
     return render_template('create_invoice.html', title='New Invoice', form=form)
+
+@app.route('/invoice/<int:invoice_id>')
+def invoice(invoice_id):
+    invoice = Invoice.query.get_or_404(invoice_id)
+    return render_template('invoice.html', title=invoice.name, invoice=invoice)
