@@ -1,7 +1,8 @@
 from flask import render_template, url_for, flash, redirect, request, abort
 from application import app, db, bcrypt
 from application.models import User, Invoice, Entry
-from application.forms import RegistrationForm, LoginForm, UpdateAccountForm, InvoiceForm
+from application.forms import RegistrationForm, LoginForm, UpdateAccountForm, InvoiceForm, UploadInvoiceForm
+from application.reader import get_invoice_data, convert_entries_to_string
 from flask_login import login_user, current_user, logout_user, login_required
 import secrets
 import os
@@ -104,6 +105,23 @@ def new_invoice():
         flash('Created a new invoice!', 'success')
         return redirect(url_for('home'))
     return render_template('create_invoice.html', title='New Invoice', form=form, legend='New Invoice')
+
+@app.route('/invoice/upload', methods=['GET', 'POST'])
+@login_required
+def upload_invoice():
+    form = UploadInvoiceForm()
+    if form.validate_on_submit():
+        #TODO HERE IS THE CONFLICT WITH CONTENT AND ENTRIES
+        picture_fn = form.invoice_file.data.filename
+        picture_path = os.path.join(app.root_path,'static/pdf_files', picture_fn)
+        extracted_data = get_invoice_data(picture_path)
+        invoice = Invoice(name=extracted_data['name'], content=convert_entries_to_string(extracted_data['entries']), 
+                          amount=extracted_data['total_amount'], author=current_user)
+        db.session.add(invoice)
+        db.session.commit()
+        flash('Created a new invoice!', 'success')
+        return redirect(url_for('home'))
+    return render_template('upload_invoice.html', title='Upload Invoice', form=form, legend='Upload Invoice')
 
 @app.route('/invoice/<int:invoice_id>')
 def invoice(invoice_id):

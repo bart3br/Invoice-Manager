@@ -125,6 +125,12 @@ def get_invoice_data(filename: str) -> dict:
     }
     return invoice_data
 
+def convert_entries_to_string(entries: list[dict]) -> str:
+    entries_str = ''
+    for entry in entries:
+        entries_str += f"{entry['name']}\t{entry['quantity']}\t{entry['price']}\t{entry['total_price']}\t{entry['tax']}\n"
+    return entries_str
+
 #testing the functions
 def reading_test():
     for root, dirs, files in os.walk('application\static\pdf_files'):
