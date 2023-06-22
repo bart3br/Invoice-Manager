@@ -98,6 +98,33 @@ def process_entry(entry: list[str]) -> tuple:
     tax = round(float(0.23 * total_price),2)
     return (name, quantity, price, total_price, tax)
 
+#counting the total amount of the invoice
+def extract_total_amount(entries: list[dict]) -> float:
+    amount = 0.0
+    for entry in entries:
+        amount += entry['total_price']
+    return round(amount, 2)
+
+
+def get_invoice_data(filename: str) -> dict:
+    text = read_file(filename)
+    invoice_title = extract_title(text)
+    seller_info = extract_seller(text)
+    date_object = extract_date(text)
+    buyer_info = extract_buyer(text)
+    invoice_entries = extract_entries(text)
+    total_amount = extract_total_amount(invoice_entries)
+    
+    invoice_data = {
+        'name': invoice_title,
+        'seller': seller_info,
+        'date': date_object,
+        'buyer': buyer_info,
+        'entries': invoice_entries,
+        'total_amount': total_amount
+    }
+    return invoice_data
+
 #testing the functions
 def reading_test():
     for root, dirs, files in os.walk('application\static\pdf_files'):
@@ -112,6 +139,7 @@ def reading_test():
                 print('Date:', extract_date(text))
                 print('Buyer:', extract_buyer(text))
                 print('Entries:', extract_entries(text))
+                print('Total Amount:', extract_total_amount(extract_entries(text)))
                 
 if __name__ == '__main__':
     #reading_test()
