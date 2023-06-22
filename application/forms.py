@@ -69,3 +69,11 @@ class UploadInvoiceForm(FlaskForm):
     def validate_invoice_file(self, invoice):
         if not invoice.data:
             raise ValidationError('Please choose a PDF file to upload new invoice.')
+        
+class StatisticsForm(FlaskForm):
+    year = StringField('Year', validators=[DataRequired()])
+    submit = SubmitField('Show Statistics')
+    
+    def validate_year(self, year):
+        if not year.data or len(year.data) != 4 or not year.data.isdigit():
+            raise ValidationError('Please enter a valid year.')

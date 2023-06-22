@@ -1,9 +1,11 @@
 from flask import render_template, url_for, flash, redirect, request, abort
 from application import app, db, bcrypt
 from application.models import User, Invoice, Entry
-from application.forms import RegistrationForm, LoginForm, UpdateAccountForm, InvoiceForm, UploadInvoiceForm
+from application.forms import RegistrationForm, LoginForm, UpdateAccountForm, InvoiceForm, UploadInvoiceForm, StatisticsForm
 from application.reader import get_invoice_data, convert_entries_to_string
+from application.statistics import avg_expenses_per_month
 from flask_login import login_user, current_user, logout_user, login_required
+from sqlalchemy import extract
 import secrets
 import os
 
@@ -119,7 +121,7 @@ def upload_invoice():
                           amount=extracted_data['total_amount'], author=current_user)
         db.session.add(invoice)
         db.session.commit()
-        flash('Created a new invoice!', 'success')
+        flash('Created a new invoice! It is recommended that you check the uploaded data in invoice details', 'success')
         return redirect(url_for('home'))
     return render_template('upload_invoice.html', title='Upload Invoice', form=form, legend='Upload Invoice')
 
@@ -164,3 +166,21 @@ def delete_invoice(invoice_id):
     db.session.commit()
     flash('Invoice has been deleted!', 'success')
     return redirect(url_for('home'))
+'''    
+def extract_amounts_and_dates_from_invoices(invoices):
+    data = []
+    for invoice in invoices:
+        data.append({'amount': invoice.amount, 'date': invoice.date_posted})
+    return data
+
+@app.route('/statistics', methods=['GET', 'POST'])
+@login_required
+def statistics():
+    form = StatisticsForm()
+    if form.validate_on_submit():
+        year = int(form.year.data)
+        invoices = Invoice.query.filter_by(extract('year', Invoice.date_posted) == year).all()
+        image = avg_expenses_per_month(year, extract_amounts_and_dates_from_invoices(invoices))
+        filename = save_new_picture(image)
+'''        
+        
