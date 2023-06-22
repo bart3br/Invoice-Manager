@@ -66,6 +66,6 @@ class UploadInvoiceForm(FlaskForm):
     invoice_file = FileField('Upload Invoice From PDF File', validators=[FileAllowed(['pdf'])])
     submit = SubmitField('Upload')
     
-    def validate_file(self, invoice):
+    def validate_invoice_file(self, invoice):
         if not invoice.data:
             raise ValidationError('Please choose a PDF file to upload new invoice.')
